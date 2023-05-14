@@ -13,9 +13,9 @@ To install the extension, follow these steps:
 
 ## Usage
 
-To use the extension, simply navigate to a page that has a password field. A "Show Password" button and a "Copy Password" button will appear next to the password field. 
+To use the extension, simply navigate to a page that has a password field. A "Peek" button and a "Copy" button will appear next to the password field. 
 
-To toggle the visibility of the password field, click the "Show Password" button. The button text will change to "Hide Password" when the password is visible.
+To toggle the visibility of the password field, click the "Peek" button. The button text will change to "Hide" when the password is visible.
 
 To copy the value of the password field to the clipboard, click the "Copy Password" button. The password will be copied to the clipboard and a message will appear in the console indicating whether the copy was successful or not.
 
