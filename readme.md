@@ -17,7 +17,7 @@ To use the extension, simply navigate to a page that has a password field. A "Pe
 
 To toggle the visibility of the password field, click the "Peek" button. The button text will change to "Hide" when the password is visible.
 
-To copy the value of the password field to the clipboard, click the "Copy Password" button. The password will be copied to the clipboard and a message will appear in the console indicating whether the copy was successful or not.
+To copy the value of the password field to the clipboard, click the "Copy" button. The password will be copied to the clipboard and a message will appear in the console indicating whether the copy was successful or not.
 
 ## Contributing
 

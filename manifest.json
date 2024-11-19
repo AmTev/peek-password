@@ -1,10 +1,10 @@
 {
   "manifest_version": 2,
   "name": "Peek Password",
-  "version": "1.0",
+  "version": "2.0",
   "description": "Adds a button to show/hide password fields",
   "author":"Chandan Bhagat",
-  "github":"https://github.com/thechandanbhagat/peek-password",
+  "github":"https://github.com/amtev/peek-password",
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
