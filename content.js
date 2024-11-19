@@ -3,45 +3,76 @@ console.log("Content script is running");
 
 let passwordButtons = new Map(); // Store references to buttons
 
-// Listen for messages from popup
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'toggleExtension') {
-    if (message.enabled) {
-      initializePasswordFeatures();
-    } else {
-      // Remove all buttons
-      passwordButtons.forEach((buttons, field) => {
-        buttons.toggleButton.remove();
-        buttons.copyButton.remove();
-        buttons.notificationSpan.remove();
-      });
-      passwordButtons.clear();
-    }
-  }
+// Create a MutationObserver to watch for DOM changes
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    handleDOMChanges();
+  });
 });
 
-function initializePasswordFeatures() {
+// Function to handle DOM changes
+function handleDOMChanges() {
   const passwordFields = document.querySelectorAll('input[type="password"]');
   
-  passwordFields.forEach(passwordField => {
-    if (!passwordButtons.has(passwordField)) {
-      const toggleButton = createToggleButton(passwordField);
-      const copyButton = createCopyButton(passwordField);
-      const notificationSpan = createNotificationSpan();
-      
-      // Store references
-      passwordButtons.set(passwordField, {
-        toggleButton,
-        copyButton,
-        notificationSpan
-      });
-      
-      // Insert elements
-      passwordField.insertAdjacentElement('afterend', toggleButton);
-      toggleButton.insertAdjacentElement('afterend', copyButton);
-      copyButton.insertAdjacentElement('afterend', notificationSpan);
+  // Remove buttons for fields that no longer exist or are hidden
+  passwordButtons.forEach((buttons, field) => {
+    if (!document.contains(field) || !isVisible(field)) {
+      buttons.toggleButton.remove();
+      buttons.copyButton.remove();
+      buttons.notificationSpan.remove();
+      passwordButtons.delete(field);
     }
   });
+
+  // Add buttons for new visible password fields
+  passwordFields.forEach(field => {
+    if (!passwordButtons.has(field) && isVisible(field)) {
+      initializeFieldButtons(field);
+    }
+  });
+}
+
+// Check if an element is visible
+function isVisible(element) {
+  return !!(element.offsetWidth || element.offsetHeight || element.getClientRects().length) &&
+    window.getComputedStyle(element).visibility !== 'hidden' &&
+    window.getComputedStyle(element).display !== 'none';
+}
+
+function initializeFieldButtons(passwordField) {
+  if (!isVisible(passwordField)) return;
+
+  const toggleButton = createToggleButton(passwordField);
+  const copyButton = createCopyButton(passwordField);
+  const notificationSpan = createNotificationSpan();
+  
+  // Store references
+  passwordButtons.set(passwordField, {
+    toggleButton,
+    copyButton,
+    notificationSpan
+  });
+  
+  // Insert elements
+  passwordField.insertAdjacentElement('afterend', toggleButton);
+  toggleButton.insertAdjacentElement('afterend', copyButton);
+  copyButton.insertAdjacentElement('afterend', notificationSpan);
+}
+
+// Initialize observer
+function initializeObserver() {
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['style', 'class', 'hidden']
+  });
+}
+
+// Initial setup
+function initializePasswordFeatures() {
+  handleDOMChanges();
+  initializeObserver();
 }
 
 function createToggleButton(passwordField) {
@@ -141,5 +172,23 @@ function createNotificationSpan() {
 chrome.storage.sync.get({ enabled: true }, function(data) {
   if (data.enabled) {
     initializePasswordFeatures();
+  }
+});
+
+// Listen for messages from popup
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === 'toggleExtension') {
+    if (message.enabled) {
+      initializePasswordFeatures();
+    } else {
+      // Remove all buttons
+      passwordButtons.forEach((buttons, field) => {
+        buttons.toggleButton.remove();
+        buttons.copyButton.remove();
+        buttons.notificationSpan.remove();
+      });
+      passwordButtons.clear();
+      observer.disconnect();
+    }
   }
 });
