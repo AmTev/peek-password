@@ -1,23 +1,124 @@
-document.addEventListener('DOMContentLoaded', function() {
-  const toggle = document.getElementById('enableToggle');
+document.addEventListener('DOMContentLoaded', async function() {
+  const globalToggle = document.getElementById('enableToggle');
+  const siteToggle = document.getElementById('siteToggle');
+  const sitesList = document.getElementById('sitesList');
+  const removeAllBtn = document.getElementById('removeAll');
   
-  // Load current state
-  chrome.storage.sync.get({ enabled: true }, function(data) {
-    toggle.checked = data.enabled;
-  });
+  // Get current tab URL
+  const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+  const hostname = new URL(tab.url).hostname;
   
-  // Save state changes
-  toggle.addEventListener('change', function() {
-    chrome.storage.sync.set({ enabled: toggle.checked }, function() {
-      // Send message to content script
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        if (tabs[0]) {
-          chrome.tabs.sendMessage(tabs[0].id, { 
-            action: 'toggleExtension',
-            enabled: toggle.checked 
-          });
-        }
+  // Load current state and update UI
+  function loadAndDisplaySites() {
+    chrome.storage.sync.get({ 
+      enabled: true,
+      restrictedSites: []
+    }, function(data) {
+      globalToggle.checked = data.enabled;
+      siteToggle.checked = !data.restrictedSites.includes(hostname);
+      siteToggle.disabled = !data.enabled;
+      
+      // Update header with count
+      const sitesCount = data.restrictedSites.length;
+      document.querySelector('.whitelisted-sites h3').textContent = 
+        `Whitelisted Sites (${sitesCount})`;
+      
+      // Show/hide remove all button
+      removeAllBtn.classList.toggle('hidden', sitesCount === 0);
+      
+      // Display whitelisted sites
+      sitesList.innerHTML = '';
+      const allSites = new Set(data.restrictedSites);
+      
+      if (allSites.size === 0) {
+        sitesList.innerHTML = '<div class="site-item">No sites whitelisted</div>';
+        return;
+      }
+      
+      allSites.forEach(site => {
+        const siteDiv = document.createElement('div');
+        siteDiv.className = 'site-item';
+        siteDiv.innerHTML = `
+          <span>${site}</span>
+          <button class="remove-site">Remove</button>
+        `;
+        
+        siteDiv.querySelector('.remove-site').addEventListener('click', () => {
+          if (confirm(`Are you sure you want to remove ${site} from the whitelist?`)) {
+            const updatedSites = data.restrictedSites.filter(s => s !== site);
+            chrome.storage.sync.set({ restrictedSites: updatedSites }, () => {
+              loadAndDisplaySites();
+              if (site === hostname) {
+                siteToggle.checked = true;
+                chrome.tabs.sendMessage(tab.id, { 
+                  action: 'toggleExtension',
+                  enabled: globalToggle.checked && true
+                });
+              }
+            });
+          }
+        });
+        
+        sitesList.appendChild(siteDiv);
       });
+    });
+  }
+  
+  // Initial load
+  loadAndDisplaySites();
+  
+  // Global toggle handler
+  globalToggle.addEventListener('change', function() {
+    const isEnabled = globalToggle.checked;
+    siteToggle.disabled = !isEnabled;
+    
+    chrome.storage.sync.set({ enabled: isEnabled }, function() {
+      chrome.tabs.sendMessage(tab.id, { 
+        action: 'toggleExtension',
+        enabled: isEnabled && siteToggle.checked
+      });
+    });
+  });
+
+  // Site toggle handler
+  siteToggle.addEventListener('change', function() {
+    chrome.storage.sync.get({ restrictedSites: [] }, function(data) {
+      let sites = data.restrictedSites;
+      if (siteToggle.checked) {
+        sites = sites.filter(site => site !== hostname);
+      } else {
+        if (!sites.includes(hostname)) {
+          sites.push(hostname);
+        }
+      }
+      
+      chrome.storage.sync.set({ restrictedSites: sites }, function() {
+        loadAndDisplaySites();
+        chrome.tabs.sendMessage(tab.id, { 
+          action: 'toggleExtension',
+          enabled: globalToggle.checked && siteToggle.checked 
+        });
+      });
+    });
+  });
+
+  // Add Remove All handler
+  removeAllBtn.addEventListener('click', function() {
+    chrome.storage.sync.get({ restrictedSites: [] }, function(data) {
+      if (data.restrictedSites.length === 0) return;
+      
+      if (confirm('Are you sure you want to remove all whitelisted sites?')) {
+        chrome.storage.sync.set({ restrictedSites: [] }, () => {
+          loadAndDisplaySites();
+          if (data.restrictedSites.includes(hostname)) {
+            siteToggle.checked = true;
+            chrome.tabs.sendMessage(tab.id, { 
+              action: 'toggleExtension',
+              enabled: globalToggle.checked && true
+            });
+          }
+        });
+      }
     });
   });
 }); 

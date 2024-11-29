@@ -81,16 +81,112 @@
     input:checked + .slider:before {
       transform: translateX(22px);
     }
+    .switch input:disabled + .slider {
+      background-color: #e0e0e0;
+      cursor: not-allowed;
+    }
+    .switch input:disabled + .slider:before {
+      background-color: #bdbdbd;
+    }
+    .whitelisted-sites {
+      margin-top: 15px;
+      border-top: 1px solid #eee;
+      padding-top: 10px;
+    }
+    .whitelisted-sites h3 {
+      font-size: 14px;
+      margin: 0 0 10px 0;
+      color: #333;
+    }
+    .site-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      font-size: 12px;
+      height: 16px;
+    }
+    .remove-site {
+      color: #F44336;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 2px 5px;
+      font-size: 12px;
+    }
+    .remove-site:hover {
+      text-decoration: underline;
+    }
+    #sitesList {
+      max-height: calc(5 * 28px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #2196F3 #e0e0e0;
+    }
+
+    /* Custom scrollbar for Webkit browsers */
+    #sitesList::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #sitesList::-webkit-scrollbar-track {
+      background: #e0e0e0;
+      border-radius: 3px;
+    }
+
+    #sitesList::-webkit-scrollbar-thumb {
+      background: #2196F3;
+      border-radius: 3px;
+    }
+
+    .sites-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .remove-all {
+      color: #F44336;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 2px 5px;
+      font-size: 12px;
+    }
+
+    .remove-all:hover {
+      text-decoration: underline;
+    }
+
+    /* Hide remove all button when no sites */
+    .remove-all.hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
   <h2>Peek Password</h2>
   <div class="container">
-    <span>Enable extension</span>
+    <span>Enable globally</span>
     <label class="switch">
       <input type="checkbox" id="enableToggle" checked>
       <span class="slider"></span>
     </label>
+  </div>
+  <div class="container">
+    <span>Enable for this site</span>
+    <label class="switch">
+      <input type="checkbox" id="siteToggle" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+  <div class="whitelisted-sites">
+    <div class="sites-header">
+      <h3>Whitelisted Sites</h3>
+      <button id="removeAll" class="remove-all">Remove All</button>
+    </div>
+    <div id="sitesList"></div>
   </div>
   <div class="privacy-notice">
     &#128274; Privacy Notice: We do not store or collect any of your passwords. All operations are performed locally on your device.

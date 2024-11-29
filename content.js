@@ -2,6 +2,7 @@
 console.log("Content script is running");
 
 let passwordButtons = new Map(); // Store references to buttons
+let currentHostname = window.location.hostname;
 
 // Create a MutationObserver to watch for DOM changes
 const observer = new MutationObserver((mutations) => {
@@ -169,8 +170,11 @@ function createNotificationSpan() {
 }
 
 // Check initial state and initialize if enabled
-chrome.storage.sync.get({ enabled: true }, function(data) {
-  if (data.enabled) {
+chrome.storage.sync.get({ 
+  enabled: true,
+  restrictedSites: []
+}, function(data) {
+  if (data.enabled && !data.restrictedSites.includes(currentHostname)) {
     initializePasswordFeatures();
   }
 });
