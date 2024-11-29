@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Peek Password",
-  "version": "2.0",
+  "version": "2.1",
   "description": "Adds a button to show/hide password fields",
   "author": "Chandan Bhagat",
   "github": "https://github.com/amtev/peek-password",
