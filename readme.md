@@ -36,9 +36,9 @@ A simple Chrome/Edge extension that adds password visibility toggle and copy fun
 3. Use the popup menu to:
    - Toggle extension globally
    - Manage per-site permissions
-   - View and manage whitelisted sites
-   - Remove individual sites from whitelist
-   - Clear all whitelisted sites at once
+   - View and manage disabled sites
+   - Remove individual sites from disabled list
+   - Clear all disabled sites at once
 
 
 ## Security & Privacy

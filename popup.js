@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       // Show/hide remove all button
       removeAllBtn.classList.toggle('hidden', sitesCount === 0);
       
-      // Display whitelisted sites
+      // Display disabled sites
       sitesList.innerHTML = '';
       const allSites = new Set(data.restrictedSites);
       
