@@ -1,6 +1,3 @@
-// Log to confirm the script is running
-console.log("Content script is running");
-
 let passwordButtons = new Map(); // Store references to buttons
 let currentHostname = window.location.hostname;
 
@@ -89,6 +86,9 @@ function createToggleButton(passwordField) {
   toggleButton.style.cursor = 'pointer';
   toggleButton.style.padding = '5px';
 
+  // Add type="button" to prevent form submission
+  toggleButton.setAttribute('type', 'button');
+
   // Add event listeners
   toggleButton.addEventListener('mousedown', (event) => {
     event.preventDefault();
@@ -101,6 +101,16 @@ function createToggleButton(passwordField) {
   });
 
   toggleButton.addEventListener('mouseup', (event) => {
+    event.preventDefault();
+    passwordField.setAttribute('type', 'password');
+    toggleButton.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>`;
+  });
+
+  toggleButton.addEventListener('mouseleave', (event) => {
     event.preventDefault();
     passwordField.setAttribute('type', 'password');
     toggleButton.innerHTML = `
